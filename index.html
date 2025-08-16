@@ -154,9 +154,7 @@
   </style>
 </head>
 <body>
-  <div class="header-card">
-    Task-Earn
-  </div>
+  <div class="header-card">Task-Earn</div>
   <div class="container" id="container">
     <div class="form-container register">
       <form onsubmit="event.preventDefault(); register();">
@@ -180,94 +178,77 @@
       <button onclick="toggle()">Switch</button>
     </div>
   </div>
-  <script>
-  if (localStorage.getItem("loggedIn") === "true") {
-  window.location.href = "dashboard.html";
-}
+
+<script>
+  // Global toggle function
+  window.toggle = function() {
     const container = document.getElementById('container');
     const overlayTitle = document.getElementById('overlayTitle');
     const overlayText = document.getElementById('overlayText');
+    container.classList.toggle('active');
+    if(container.classList.contains('active')) {
+      overlayTitle.textContent = "Welcome Back!";
+      overlayText.textContent = "Already have an account? Log in";
+    } else {
+      overlayTitle.textContent = "Hello, Friend!";
+      overlayText.textContent = "Don’t have an account? Register now";
+    }
+  }
 
-    function toggle() {
-      container.classList.toggle('active');
-      if (container.classList.contains('active')) {
-        overlayTitle.textContent = "Welcome Back!";
-        overlayText.textContent = "Already have an account? Log in";
-      } else {
-        overlayTitle.textContent = "Hello, Friend!";
-        overlayText.textContent = "Don’t have an account? Register now";
-      }
+  // Simple user database
+  let users = []; // {email, password, verified}
+
+  function register() {
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
+
+    // Check if email already exists
+    if(users.some(u => u.email === email)){
+      alert("❌ Email already registered.");
+      return;
     }
 
-    function register() {
-      alert("Registration Successful!");
+    // Add user as unverified
+    users.push({email, password, verified: false});
+    alert(`✅ Verification email sent to ${email}. Please confirm to activate your account.`);
+
+    // Simulate email verification
+    setTimeout(() => {
+      const user = users.find(u => u.email === email);
+      if(user) {
+        user.verified = true;
+        alert(`📧 Email ${email} verified successfully. You can now login!`);
+      }
+    }, 2000);
+  }
+
+  function login() {
+    const email = document.getElementById('logEmail').value.trim();
+    const password = document.getElementById('logPassword').value.trim();
+
+    const user = users.find(u => u.email === email);
+    if(!user) {
+      alert("❌ Invalid login credentials.");
+      return;
     }
-function login() {
-  alert("Login Successful!");
-  // Save login status
-  localStorage.setItem("loggedIn", "true");
-  // Go to homepage
-  window.location.href = "dashboard.html";
-}
-    
-    <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+    if(!user.verified){
+      alert("⚠️ Please verify your email before login.");
+      return;
+    }
+    if(user.password !== password){
+      alert("❌ Invalid login credentials.");
+      return;
+    }
 
-// Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyCK0uJ1Zr2xPp_uFGZlabDwX0SPs69SNdg",
-  authDomain: "taskearn-b048d.firebaseapp.com",
-  projectId: "taskearn-b048d",
-  storageBucket: "taskearn-b048d.firebasestorage.app",
-  messagingSenderId: "499511970329",
-  appId: "1:499511970329:web:509a1aacdc23c630c3f888"
-};
+    alert("✅ Login Successful!");
+    localStorage.setItem("loggedIn","true");
+    window.location.href = "dashboard.html";
+  }
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-// Replace your register function
-function register() {
-  const email = document.getElementById("regEmail").value;
-  const password = document.getElementById("regPassword").value;
-
-  createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      sendEmailVerification(user).then(() => {
-        alert("✅ Verification email sent! Please check your email to verify before logging in.");
-      });
-    })
-    .catch((error) => {
-      if (error.code === "auth/email-already-in-use") {
-        alert("⚠️ This email is already registered!");
-      } else {
-        alert("❌ " + error.message);
-      }
-    });
-}
-
-// Replace your login function
-function login() {
-  const email = document.getElementById("logEmail").value;
-  const password = document.getElementById("logPassword").value;
-
-  signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      if (user.emailVerified) {
-        localStorage.setItem("loggedIn", "true");
-        window.location.href = "dashboard.html"; // Your homepage
-      } else {
-        alert("⚠️ Please verify your email before logging in.");
-      }
-    })
-    .catch((error) => {
-      alert("❌ Invalid login credentials or user does not exist.");
-    });
-}
+  // Auto redirect if logged in
+  if(localStorage.getItem("loggedIn") === "true"){
+    window.location.href = "dashboard.html";
+  }
 </script>
-  </script>
 </body>
 </html>
