@@ -210,6 +210,64 @@ function login() {
   window.location.href = "dashboard.html";
 }
     
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCK0uJ1Zr2xPp_uFGZlabDwX0SPs69SNdg",
+  authDomain: "taskearn-b048d.firebaseapp.com",
+  projectId: "taskearn-b048d",
+  storageBucket: "taskearn-b048d.firebasestorage.app",
+  messagingSenderId: "499511970329",
+  appId: "1:499511970329:web:509a1aacdc23c630c3f888"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Replace your register function
+function register() {
+  const email = document.getElementById("regEmail").value;
+  const password = document.getElementById("regPassword").value;
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      sendEmailVerification(user).then(() => {
+        alert("✅ Verification email sent! Please check your email to verify before logging in.");
+      });
+    })
+    .catch((error) => {
+      if (error.code === "auth/email-already-in-use") {
+        alert("⚠️ This email is already registered!");
+      } else {
+        alert("❌ " + error.message);
+      }
+    });
+}
+
+// Replace your login function
+function login() {
+  const email = document.getElementById("logEmail").value;
+  const password = document.getElementById("logPassword").value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      if (user.emailVerified) {
+        localStorage.setItem("loggedIn", "true");
+        window.location.href = "dashboard.html"; // Your homepage
+      } else {
+        alert("⚠️ Please verify your email before logging in.");
+      }
+    })
+    .catch((error) => {
+      alert("❌ Invalid login credentials or user does not exist.");
+    });
+}
+</script>
   </script>
 </body>
 </html>
