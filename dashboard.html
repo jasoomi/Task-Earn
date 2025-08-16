@@ -85,22 +85,53 @@ const db = firebase.firestore();
 let profileData = {}, profileSaved = false, userXP = 0, currentLevel = 1;
 let completedTasks = [], totalEarnings = 0, totalWithdraw = 0;
 
+// --- LOAD PROFILE & TASKS FROM LOCALSTORAGE ---
+window.onload = () => {
+  const savedProfile = localStorage.getItem('profileData');
+  if(savedProfile){
+    profileData = JSON.parse(savedProfile);
+    profileSaved = true;
+  } else {
+    document.getElementById("profilePopup").style.display = "block";
+  }
+
+  const savedTasks = localStorage.getItem('completedTasks');
+  if(savedTasks) completedTasks = JSON.parse(savedTasks);
+  const savedEarnings = localStorage.getItem('totalEarnings');
+  if(savedEarnings) totalEarnings = parseInt(savedEarnings);
+  const savedWithdraw = localStorage.getItem('totalWithdraw');
+  if(savedWithdraw) totalWithdraw = parseInt(savedWithdraw);
+};
+
 // --- UTILITY FUNCTIONS ---
-function showLevelUpBanner(){const banner=document.getElementById("levelUpBanner");banner.style.top="20px";setTimeout(()=>banner.style.top="-100px",2000);}
-function updateXPBar(){const p=document.getElementById("levelProgress");if(!p)return;const perc=Math.min((userXP/400)*100,100);p.style.width=perc+"%";p.textContent=userXP;}
-function renderProfileDetails(){document.getElementById("mainContent").innerHTML=`
+function showLevelUpBanner(){
+  const banner = document.getElementById("levelUpBanner");
+  banner.style.top="20px";
+  setTimeout(()=>banner.style.top="-100px",2000);
+}
+function updateXPBar(){
+  const p=document.getElementById("levelProgress");
+  if(!p) return;
+  const perc=Math.min((userXP/400)*100,100);
+  p.style.width=perc+"%";
+  p.textContent=userXP;
+}
+function renderProfileDetails(){
+  document.getElementById("mainContent").innerHTML=`
 <div class="profile-detail-card">
-<p><strong>Name:</strong>${profileData.name}</p>
-<p><strong>Email:</strong>${profileData.email}</p>
-<p><strong>Age:</strong>${profileData.age}</p>
-<p><strong>City:</strong>${profileData.city}</p>
-<p><strong>Withdraw Method:</strong>${profileData.method}</p>
+<p><strong>Name:</strong> ${profileData.name}</p>
+<p><strong>Email:</strong> ${profileData.email}</p>
+<p><strong>Age:</strong> ${profileData.age}</p>
+<p><strong>City:</strong> ${profileData.city}</p>
+<p><strong>Withdraw Method:</strong> ${profileData.method}</p>
 </div>
 <div class="level-card">
 <h3>Level ${currentLevel}</h3>
 <p>XP: ${userXP} / 400</p>
 <div class="level-bar"><div id="levelProgress" class="level-progress"></div></div>
-</div>`;updateXPBar();}
+</div>`;
+  updateXPBar();
+}
 
 // --- TAB FUNCTION ---
 function showContent(tab, element){
@@ -151,16 +182,25 @@ function openProfile(el){showContent('profile',el);}
 
 // --- PROFILE SAVE ---
 function saveProfile(){
-  const f=document.getElementById("firstName").value.trim(),
-        l=document.getElementById("lastName").value.trim(),
-        a=document.getElementById("age").value.trim(),
-        c=document.getElementById("city").value.trim(),
-        e=document.getElementById("email").value.trim(),
-        m=document.getElementById("withdrawMethod").value;
+  const f = document.getElementById("firstName").value.trim(),
+        l = document.getElementById("lastName").value.trim(),
+        a = document.getElementById("age").value.trim(),
+        c = document.getElementById("city").value.trim(),
+        e = document.getElementById("email").value.trim(),
+        m = document.getElementById("withdrawMethod").value;
+
   if(!f||!l||!a||!c||!e||!m){alert("⚠️ Fill all profile fields.");return;}
   const pat=/^[a-zA-Z0-9._%+-]+@gmail\.com$/;
   if(!pat.test(e)){alert("⚠️ Enter valid Gmail.");return;}
-  profileData={name:f+' '+l,age:a,city:c,email:e,method:m};profileSaved=true;renderProfileDetails();document.getElementById("profilePopup").style.display="none";
+
+  profileData={name:f+' '+l,age:a,city:c,email:e,method:m};
+  profileSaved=true;
+
+  // Save profile locally
+  localStorage.setItem('profileData', JSON.stringify(profileData));
+
+  renderProfileDetails();
+  document.getElementById("profilePopup").style.display="none";
 }
 
 // --- TASK VIDEO WATCH ---
@@ -168,7 +208,12 @@ function watchVideoTask(taskId,url,duration){
   if(completedTasks.includes(taskId)){alert("✅ Already completed!");return;}
   const w=window.open(url,'_blank');alert("Watch the video for at least 30 seconds, then return and click OK to claim reward.");
   completedTasks.push(taskId);
-  userXP+=30;totalEarnings+=50; // reward
+  userXP+=30;totalEarnings+=50;
+
+  // Save progress locally
+  localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+  localStorage.setItem('totalEarnings', totalEarnings);
+
   if(userXP>=400){currentLevel++;showLevelUpBanner();}
   alert("✅ Task reward added!");
   showContent('tasks');
@@ -180,6 +225,11 @@ function processWithdraw(){
   if(amt<300){alert("Min withdrawal 300 PKR");return;}
   totalWithdraw+=parseInt(amt);
   totalEarnings-=parseInt(amt);
+
+  // Save withdrawal locally
+  localStorage.setItem('totalWithdraw', totalWithdraw);
+  localStorage.setItem('totalEarnings', totalEarnings);
+
   alert(`✅ Withdrawal of ${amt} PKR approved.`);
   showContent('withdraw');
 }
