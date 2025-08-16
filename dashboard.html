@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task-Earn</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  background: white;
+  color: #764ba2;
+  padding: 20px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 0 0 15px 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  margin: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+#mainContent {
+  flex: 1;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  background: white;
+  padding: 15px;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+  margin: 0 10px 15px 10px;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+}
+
+.nav-item {
+  text-align: center;
+  color: #888;
+  font-size: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.nav-item.active {
+  color: #764ba2;
+  transform: scale(1.2);
+}
+
+/* Popup Profile */
+#profilePopup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  width: 90%;
+  max-width: 400px;
+  z-index: 1000;
+  text-align: left;
+}
+
+#profilePopup input, #profilePopup select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+#profilePopup button {
+  background: #764ba2;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* Earnings Cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  width: 100%;
+}
+
+.card {
+  background: white;
+  color: #333;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.card h3 {
+  margin-bottom: 10px;
+  color: #764ba2;
+}
+
+.card p {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Withdraw Form */
+.withdraw-form {
+  max-width: 400px;
+  margin: auto;
+  text-align: left;
+}
+
+.withdraw-form input, .withdraw-form select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.withdraw-form button {
+  background: #764ba2;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.withdraw-form button:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+/* Task Cards Horizontal Scroll */
+.task-cards {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px;
+  scroll-behavior: smooth;
+  padding-bottom: 20px;
+}
+
+.task-card {
+  flex: 0 0 250px;
+  min-width: 250px;
+  height: 200px;
+  background: white;
+  color: #333;
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.task-card.completed {
+  background: #d4edda;
+  color: #155724;
+  cursor: default;
+}
+
+.task-card:hover:not(.completed) {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+/* Profile Detail Card */
+.profile-detail-card {
+  background: white;
+  color: #333;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: left;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+/* Level Card */
+.level-card {
+  background: white;
+  color: #333;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.level-bar {
+  background: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 20px;
+  margin-top: 10px;
+}
+
+.level-progress {
+  height: 100%;
+  background: #764ba2;
+  width: 0%;
+  text-align: right;
+  padding-right: 5px;
+  color: white;
+  font-weight: bold;
+  line-height: 20px;
+  transition: width 1s ease;
+}
+
+/* Level Up Banner */
+#levelUpBanner {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: gold;
+  color: black;
+  font-size: 20px;
+  padding: 10px 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 2000;
+  transition: top 0.5s ease;
+}
+</style>
+</head>
+<body>
+<header>Welcome to Task-Earn</header>
+
+<div id="mainContent">Home</div>
+<div id="levelUpBanner">🎉 Congratulations! Level Up! 👏</div>
+
+<!-- Profile Popup -->
+<div id="profilePopup">
+  <h2>Complete Profile</h2>
+  <input type="text" id="firstName" placeholder="First Name">
+  <input type="text" id="lastName" placeholder="Last Name">
+  <input type="number" id="age" placeholder="Age">
+  <input type="text" id="city" placeholder="City">
+  <input type="email" id="email" placeholder="Email">
+  <select id="withdrawMethod">
+    <option value="">Select Withdraw Method</option>
+    <option value="Easypaisa">Easypaisa</option>
+    <option value="JazzCash">JazzCash</option>
+  </select>
+  <button onclick="saveProfile()">Save</button>
+</div>
+
+<div class="bottom-nav">
+  <div class="nav-item" onclick="openProfile(this)">
+    <i class="fa-solid fa-user"></i>
+  </div>
+  <div class="nav-item" onclick="showContent('tasks', this)">
+    <i class="fa-solid fa-list-check"></i>
+  </div>
+  <div class="nav-item" onclick="showContent('earnings', this)">
+    <i class="fa-solid fa-wallet"></i>
+  </div>
+  <div class="nav-item" onclick="showContent('withdraw', this)">
+    <i class="fa-solid fa-money-bill-transfer"></i>
+  </div>
+</div>
+
+<script>
+let profileData = {};
+let profileSaved = false;
+let userXP = 0;
+let currentLevel = 1;
+const levelXP = [400, 900, 1400];
+let completedTasks = [];
+
+function showLevelUpBanner() {
+  const banner = document.getElementById("levelUpBanner");
+  banner.style.top = "20px";
+  setTimeout(() => banner.style.top = "-100px", 2000);
+}
+
+function showContent(tab, element) {
+  document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+  if(element) element.classList.add("active");
+  document.getElementById("profilePopup").style.display = "none";
+
+  if(tab === "earnings") {
+    document.getElementById("mainContent").innerHTML = `
+      <div class="cards">
+        <div class="card">
+          <h3>📅 Today Earnings</h3>
+          <p>50 PKR</p>
+        </div>
+        <div class="card">
+          <h3>💰 Total Earnings</h3>
+          <p>500 PKR</p>
+        </div>
+        <div class="card">
+          <h3>✅ Tasks Completed</h3>
+          <p>20</p>
+        </div>
+        <div class="card">
+          <h3>🏦 Total Withdrawals</h3>
+          <p>200 PKR</p>
+        </div>
+      </div>
+    `;
+  } else if(tab === "withdraw") {
+    document.getElementById("mainContent").innerHTML = `
+      <div class="withdraw-form">
+        <h2>Withdraw Funds</h2>
+        <input type="text" value="${profileData.name || ''}" placeholder="Username" readonly>
+        <input type="email" value="${profileData.email || ''}" placeholder="Email" readonly>
+        <input type="number" id="withdrawAmount" placeholder="Amount (Min 300)">
+        <input type="text" id="accountName" placeholder="Account Name">
+        <input type="text" id="accountNumber" placeholder="Account Number">
+        <select id="paymentMethod">
+          <option value="">Select Payment Method</option>
+          <option value="Easypaisa">Easypaisa</option>
+          <option value="JazzCash">JazzCash</option>
+        </select>
+        <button id="withdrawBtn" onclick="processWithdraw()">Withdraw</button>
+        <button onclick="lastWithdraw()">Last Withdraw</button>
+      </div>
+    `;
+  } else if(tab === "tasks") {
+    let tasksHTML = `<div class="task-cards">`;
+    for(let i=1;i<=5;i++){
+      const completed = completedTasks.includes(i) ? 'completed' : '';
+      const text = completed ? `✅ Task ${i} Completed` : `Task ${i}`;
+      tasksHTML += `<div class="task-card ${completed}" id="task${i}" onclick="completeTask(${i},30)">${text}</div>`;
+    }
+    tasksHTML += `</div>`;
+    document.getElementById("mainContent").innerHTML = tasksHTML;
+  } else if(tab === "profile") {
+    if(profileSaved) renderProfileDetails();
+    else document.getElementById("profilePopup").style.display = "block";
+  } else document.getElementById("mainContent").innerText = tab;
+}
+
+function openProfile(element){
+  showContent('profile', element);
+}
+
+function saveProfile() {
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const age = document.getElementById("age").value.trim();
+  const city = document.getElementById("city").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const method = document.getElementById("withdrawMethod").value;
+
+  if(!firstName || !lastName || !age || !city || !email || !method){
+    alert("⚠️ Please fill all profile fields.");
+    return;
+  }
+
+  const gmailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  if(!gmailPattern.test(email)){
+    alert("⚠️ Please enter a valid Gmail address.");
+    return;
+  }
+
+  profileData = {
+    name: firstName + " " + lastName,
+    age: age,
+    city: city,
+    email: email,
+    method: method
+  };
+  profileSaved = true;
+  renderProfileDetails();
+  document.getElementById("profilePopup").style.display = "none";
+}
+
+function renderProfileDetails(){
+  document.getElementById("mainContent").innerHTML = `
+    <div class="profile-detail-card">
+      <p><strong>Name:</strong> ${profileData.name}</p>
+      <p><strong>Email:</strong> ${profileData.email}</p>
+      <p><strong>Age:</strong> ${profileData.age}</p>
+      <p><strong>City:</strong> ${profileData.city}</p>
+      <p><strong>Withdraw Method:</strong> ${profileData.method}</p>
+    </div>
+    <div class="level-card">
+      <h3>Level ${currentLevel}</h3>
+      <p>XP: ${userXP} / ${levelXP[currentLevel-1]}</p>
+      <div class="level-bar">
+        <div id="levelProgress" class="level-progress"></div>
+      </div>
+    </div>
+  `;
+  updateXPBar();
+}
+
+function updateXPBar(){
+  const progress = document.getElementById("levelProgress");
+  const percentage = Math.min((userXP/levelXP[currentLevel-1])*100,100);
+  progress.style.width = percentage + "%";
+  progress.textContent = Math.min(userXP, levelXP[currentLevel-1]);
+}
+
+function completeTask(taskId, xpGain){
+  if(completedTasks.includes(taskId)) return;
+
+  // Simulate task approval
+  const taskApproved = true;
+  if(taskApproved){
+    completedTasks.push(taskId);
+    userXP += xpGain;
+    if(currentLevel < levelXP.length && userXP >= levelXP[currentLevel-1]){
+      currentLevel++;
+      showLevelUpBanner();
+    }
+    showContent('tasks');
+    if(profileSaved) renderProfileDetails();
+    alert(`✅ Task completed! +${xpGain} XP`);
+  }
+}
+
+function processWithdraw(){
+  const amount = document.getElementById("withdrawAmount").value;
+  if(amount < 300){ alert("Minimum withdrawal amount is 300 PKR"); return; }
+  alert(`✅ Withdrawal request of ${amount} PKR submitted. A confirmation email will be sent to ${profileData.email}`);
+}
+
+function lastWithdraw(){
+  alert("📌 Your last withdrawal was 200 PKR on 10 Aug 2025.");
+}
+</script>
+</body>
+</html>
